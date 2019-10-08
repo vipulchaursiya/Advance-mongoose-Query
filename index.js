@@ -5,35 +5,71 @@ const moment = require('moment');
 
 
 ///   connect  mongoose to database
-let db;
-Mongoose.connect("mongodb://localhost:27017/schooldata", function(err, db) {
-     db = Mongoose.connection;
+Mongoose.connect("mongodb://localhost:27017/schooldata", function(err, db) {   
   if(err) { return console.dir(err); }
   else{console.log("connection established")} 
   
 });
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////-------->1. Find all schools located in Jaipur  <---------------------
-function first(){
-var startTime = moment();
+function first1(){
+  var startTime = moment(); 
  schoolModel.find({ 'data.district': 'JAIPUR' }, 'data.name-of-institution', function (err, doc) {  
-      if (!err)
+   if (!err)
           { 
           console.log(doc);
           }
       else 
           { console.log(err) };  
       var timeNow = moment();
-      var diff = moment(timeNow).diff(startTime);
+      let diff = moment(timeNow).diff(startTime);
+      console.log("without aggregation")
       console.log(diff); 
 })
 }
-first();
+first1();
+
+////////--------------->1 find all schools in jaipur with aggregation<----------------
+function first2(){ 
+   var startTime1 = moment(); 
+   schoolModel.aggregate([{$match:{"data.district":"JAIPUR"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {      
+    if (!err)
+            { 
+              console.log(doc);
+            }
+        else 
+            { console.log(err) };  
+        var timeNow = moment();
+        console.log(timeNow)
+        var diff = moment(timeNow).diff(startTime);
+        console.log("with aggregation")
+        console.log(diff);
+  })
+  }
+  first2();
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////-------> 2. Find all schools located in Rajasthan <-------------------
-function second(){
+function second1(){
   var startTime = moment();
 schoolModel.find({ 'data.state': 'RAJASTHAN' }, 'data.name-of-institution data.district', function (err, doc) {
+      if (!err) 
+        {          
+         //  console.log(doc);
+        }   
+      else 
+          return console.log(err);    
+      var timeNow = moment();
+      var diff = moment(timeNow).diff(startTime);
+     // console.log("without aggregation")
+     // console.log(diff); 
+})
+}
+second1();
+/////////////----->2.find all schools loacted in Rajasthan with aggregation<-----------
+
+function second2(){
+  var startTime = moment();
+schoolModel.aggregate([{$match:{"data.state":"JAIPUR"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {
       if (!err) 
         {  
          //  console.log(doc);
@@ -42,28 +78,48 @@ schoolModel.find({ 'data.state': 'RAJASTHAN' }, 'data.name-of-institution data.d
           return console.log(err);    
       var timeNow = moment();
       var diff = moment(timeNow).diff(startTime);
+     // console.log("with aggregation");
      // console.log(diff); 
 })
 }
-second();
+second2();
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 ///////-------> 3. Find all schools started after 1 Jan 2017 <-------------------
-function third(){
+function third1(){
   var startTime = moment();
-schoolModel.find({"data.from":{$gt :"1/1/2017"}}, 'data.name-of-institution ', function (err, doc) {
+schoolModel.find({"data.from":{$gt :"2017"}}, 'data.name-of-institution', function (err, doc) {
       if (!err) 
            {
-           // console.log(doc);   
+          //  console.log(doc);   
            }
       else 
           {return console.log(err);}    
       var timeNow = moment();
       var diff = moment(timeNow).diff(startTime);
+      //console.log("without aggregation")
       // console.log(diff); 
 })
 }
-third();
-/////////////////////////////////////////////////////////////////////////////
+third1();
+///////-------> 3. Find all schools started after 1 Jan 2017 with aggregation <-------------------
+function third2(){
+  var startTime = moment();
+ schoolModel.aggregate([{$match:{"data.from":{$gt :"2017"}}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {
+      if (!err) 
+           {
+          //   console.log(doc);   
+           }
+      else 
+          {return console.log(err);}    
+      var timeNow = moment();
+      var diff = moment(timeNow).diff(startTime);
+     // console.log("with aggregation")
+     //  console.log(diff); 
+})
+}
+third2();
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 //////--------> 4. Make a table of all schools in Karnataka with 
 //     Column 1 as the name of the district and column 2 as the number of schools in that district<-------------------
 function fourth(){
@@ -77,11 +133,9 @@ schoolModel.aggregate([{$match:{"data.state":"KARNATAKA"}},{$group:{_id:"$data.d
           {return console.log(err);}    
       var timeNow = moment();
       var diff = moment(timeNow).diff(startTime);
-      //console.log(diff); 
+        //console.log(diff); 
 }) 
 }
 fourth();
-////////////////////////////////////////////////
-
 
 
