@@ -13,7 +13,8 @@ Mongoose.connect("mongodb://localhost:27017/schooldata", function(err, db) {
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////-------->1. Find all schools located in Jaipur  <---------------------
 function first1(){
-  var startTime = moment(); 
+  var startTime = moment();
+ 
  schoolModel.find({ 'data.district': 'JAIPUR' }, 'data.name-of-institution', function (err, doc) {  
    if (!err)
           { 
@@ -21,26 +22,26 @@ function first1(){
           }
       else 
           { console.log(err) };  
-      var timeNow = moment();
+      var timeNow = moment();     
       let diff = moment(timeNow).diff(startTime);
       console.log("without aggregation")
-      console.log(diff); 
+      console.log(diff);       
 })
+
 }
 first1();
 
 ////////--------------->1 find all schools in jaipur with aggregation<----------------
 function first2(){ 
-   var startTime1 = moment(); 
-   schoolModel.aggregate([{$match:{"data.district":"JAIPUR"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {      
+   var startTime = moment();   
+  schoolModel.aggregate([{$match:{"data.district":"JAIPUR"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {      
     if (!err)
             { 
               console.log(doc);
             }
         else 
-            { console.log(err) };  
-        var timeNow = moment();
-        console.log(timeNow)
+            { console.log(err) }; 
+          var  timeNow= moment();             
         var diff = moment(timeNow).diff(startTime);
         console.log("with aggregation")
         console.log(diff);
