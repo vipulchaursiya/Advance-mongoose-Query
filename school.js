@@ -18,3 +18,4 @@ var schoolSchema = mongoose.Schema({
     
 });
 module.exports = mongoose.model('exambazaar.schools', schoolSchema); 
+ 
