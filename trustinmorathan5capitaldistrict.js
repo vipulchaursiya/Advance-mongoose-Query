@@ -21,6 +21,7 @@ Mongoose.connect("mongodb://localhost:27017/mongodb-102", function(err, db) {
 //------------>2. Find the names of all school trusts & associated schools which have schools in 5 or more ----------------------->capital districts | find cities ///////////////////////////
 
 function trustInMoraThan5CapitalDistrict(){  
+  var nMin = 1;
   schoolModel.aggregate([                             // finding trust with all their information
     {
       $group:{
@@ -40,30 +41,33 @@ function trustInMoraThan5CapitalDistrict(){
       }
     }   
   ],  function (err, detailsOfTrust) {
-        finalTrust=[];                                             // trust array which are in 5 or more capital district         
+        finalTrust=[];                                             // array of trust which are in 5 or more capital district         
         if (!err){
           detailsOfTrust.forEach( function(Element){              
+            counter=0;
             if(Element.trustname != ""){
-              var cities=Element['cities']                         //  only cities from element in cities 
+              var cities=Element['cities'];                        //  only cities from element in cities 
+              var capitals = [];
               cities.forEach(function (cityElement){               // capitalelement is single value of capitaldistrict array
-                var capitals = [];
                 eIndex=capitalDistrict.indexOf(cityElement)        // checking value match in cityelement 
                 if(eIndex!=-1){                                    // if match 
                   counter+=1;                                      // increase counter with 1
-                  if(counter == 5 ){                               //if its mathches 5 times then push the element in array
-                    finalTrust.push(Element);                      // push the element in array if it have trust in 5 or more                                                                     
-                  }                                                // capital  districts
-                  capitals.push();                
+                  capitals.push(cityElement);                
                 }
               });
-              counter=0;                                           // set counter 0 for next iteration 
+              Element.capitals = capitals;
+              if(counter >= nMin ){
+                //if its mathches 5 times then push the element in array
+                finalTrust.push(Element);
+                // push the element in array if it have trust in 5 or more                             
+              }
             }
           });    
         }
         else{
           return console.log(err);
         }     
-        console.log(finalTrust);                                    // final result
+        console.log(finalTrust.length);                                    // final result
   }) 
 }
 trustInMoraThan5CapitalDistrict();

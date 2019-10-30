@@ -19,7 +19,7 @@ Mongoose.connect("mongodb://localhost:27017/mongodb-102", function(err, db) {
 // }
 
 
-/* function principalWithDegree(){
+ function principalWithDegree(){
   var startTime = moment();
   schoolModel.find( {},'data.name-of-principal-head-of-institution  data.principals-educationalprofessional-qualifications', function (err, doc) {  
     if (!err){ 
@@ -31,52 +31,13 @@ Mongoose.connect("mongodb://localhost:27017/mongodb-102", function(err, db) {
       { console.log(err) };        
   });
 }
-principalWithDegree(); */
+/* principalWithDegree (); */
 
-//Find the names of all school trusts & associated schools which have a school in 5 or more districts<------------
-/* function trustIn5OrMoreDistricts(){
-  var startTime = moment();
-  schoolModel.aggregate([
-    {
-      $group:{
-        _id:"$data.name-of-trust-society-managing-committee", 
-        Numberofschools:{$sum:1}, 
-        cities: {$addToSet: "$data.district"},
-        schools:{$addToSet:"$data.name-of-institution"}
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        "moreThanThreshold":{"$cond":{ if :{ $gte :[{"$size":"$cities"},5]}, then:true,else:false}},
-        "trustname":"$_id",
-        "schools":"$schools",
-        "cities":"$cities"
-      }
-    }
-    ,
-    {
-      $match: {
-        "moreThanThreshold": true,
-      },
-    }
-  ],  function (err, doc) {
-        if (!err) 
-          {
-          console.log(doc);  
-          } 
-        else 
-            {return console.log(err);}    
-        var timeNow = moment();
-        var diff = moment(timeNow).diff(startTime);
-         console.log(diff); 
-  }) 
-}
-trustIn5OrMoreDistricts(); */
+
 
 
         /* -------->1. Find all schools located in Jaipur  <--------------------- */
-/* function allSchoolInJaipur(){
+function allSchoolInJaipur(){
   var startTime = moment();
   schoolModel.find({ 'data.district': 'JAIPUR' }, {'data.name-of-institution': 1}, function (err, doc) {  
     if (!err){ 
@@ -90,26 +51,9 @@ trustIn5OrMoreDistricts(); */
         console.log(diff);       
   })
 }
-allSchoolInJaipur(); */
+/* allSchoolInJaipur();  */
 
-// ////////--------------->1 find all schools in jaipur with aggregation<----------------
-// function first2(){ 
-//    var startTime = moment();   
-//   schoolModel.aggregate([{$match:{"data.district":"JAIPUR"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {      
-//     if (!err)
-//             { 
-//               console.log(doc);
-//             }
-//         else 
-//             { console.log(err) }; 
-//           var  timeNow= moment();             
-//         var diff = moment(timeNow).diff(startTime);
-//        // console.log("with aggregation")
-//        //console.log(diff);
-//   })
-//   }
-//   //first2();
-// //////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // ///////-------> 2. Find all schools located in Rajasthan <-------------------
 function second1(){
   var startTime = moment();
@@ -121,66 +65,43 @@ schoolModel.find({ 'data.state': 'RAJASTHAN' }, 'data.name-of-institution data.d
       else 
           return console.log(err);    
       var timeNow = moment();
-      var diff = moment(timeNow).diff(startTime);
-     // console.log("without aggregation")
+      var diff = moment(timeNow).diff(startTime);    
      // console.log(diff); 
 })
 }
 //second1();
-// /////////////----->2.find all schools located in Rajasthan with aggregation<-----------
 
-function second2(){
-  var startTime = moment();
-schoolModel.aggregate([{$match:{"data.state":"RAJASTHAN"}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {
-      if (!err) 
-        {  
-           //console.log(doc);
-        }   
-      else 
-          return console.log(err);    
-      var timeNow = moment();
-      var diff = moment(timeNow).diff(startTime);
-     // console.log("with aggregation");
-     // console.log(diff); 
-})
-}
-// //second2();
 
-// //////////////////////////////////////////////////////////////////////////////////////////////
 // ///////-------> 3. Find all schools started after 1 Jan 2017 <-------------------
-function third1(){
+function schoolsAfterDate(){
   var startTime = moment();
-schoolModel.find({"data.from":{$gt :"2017"}}, {'data.name-of-institution': 1, "data.from": 1}, function (err, doc) {
+  var givenDate=new  moment('1/1/2017', "DD/MM/YYYY").toDate();  
+schoolModel.find( {},{'data.name-of-institution': 1, "data.date-of-first-opening-of-school": 1}, function (err, schoolsWithDate) {
       if (!err) 
            {
-            console.log(doc);   
+             var schoolsAfterGivenDate=[];
+             schoolsWithDate.forEach(function(Element,eIndex){
+             var openingDate= Element.data['date-of-first-opening-of-school']   
+                // date of opening of school       
+             var openingDate = new moment(openingDate, "DD/MM/YYYY").toDate();              
+             if(openingDate>givenDate){       
+                   // check if opening date is greater than 1/1/2017           
+                 schoolsAfterGivenDate.push(Element);
+                   //push the Element in final result 
+             }
+            })   
            }
-      else 
-          {return console.log(err);}    
-      var timeNow = moment();
-      var diff = moment(timeNow).diff(startTime);
-      console.log("without aggregation")
+      else{
+        return console.log(err);
+      }    
+       var timeNow = moment();
+       var diff = moment(timeNow).diff(startTime);     
        console.log(diff); 
+       console.log(schoolsAfterGivenDate);
 })
-}
-// //third1();
-// ///////-------> 3. Find all schools started after 1 Jan 2017 with aggregation <-------------------
-function third2(){
-  var startTime = moment();
- schoolModel.aggregate([{$match:{"data.from":{$gt :"2017"}}},{$group:{_id:"$data.name-of-institution",count:{$sum:1}}}], function (err, doc) {
-      if (!err) 
-           {
-          //   console.log(doc);   
-           }
-      else 
-          {return console.log(err);}    
-      var timeNow = moment();
-      var diff = moment(timeNow).diff(startTime);
-     // console.log("with aggregation")
-     //  console.log(diff); 
-})
-}
-// //third2();
+} 
+schoolsAfterDate();
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // //////--------> 4. Make a table of all schools in Karnataka with 
 // //     Column 1 as the name of the district and column 2 as the number of schools in that district<-------------------

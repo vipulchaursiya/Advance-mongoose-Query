@@ -18,41 +18,40 @@ Mongoose.connect("mongodb://localhost:27017/mongodb-102", function(err, db) {   
   
   function findPrincipleWithMasterDegree()  {
     startTime= new moment();                ///< finding principle with all degrees 
-  schoolModel.find( {},'data.name-of-principal-head-of-institution  data.principals-educationalprofessional-qualifications',
-     function (err, dataPriciplesandDegree) {
+    schoolModel.find({},
+    {
+      "data.name-of-principal-head-of-institution": 1,
+      "data.principals-educationalprofessional-qualifications": 1
+    },
+      function (err, dataPriciplesandDegree) {
         if(!err){
-            var k = 0;
-            var allDegrees = [];                                                         /// array of all degree
-            var mastersDegrees = [];                                                     //  array of master degree 
-            dataPriciplesandDegree.forEach( (Element, eIndex)=>{          /// loop for taking all master degree in seprate array
-                var thisDegrees = Element.data['principals-educationalprofessional-qualifications'];
-                var thisDegrees = thisDegrees.split(",");                                     //  saperate degrees 
+            var mastersDegrees = [];                                        //  array of master degree 
+            dataPriciplesandDegree.forEach( (Element, eIndex)=>{           // loop for taking all master degree in seprate array
+              var thisDegrees = Element.data['principals-educationalprofessional-qualifications'];
+              var thisDegrees = thisDegrees.split(",");                  //  saperate degrees 
               thisDegrees.forEach( (thisDegree, dIndex)=>{
-                 if(thisDegree){                                                     
-                    thisDegree = sanitizeDegree(thisDegree);                            // filtering degree
-                    var mIndex = allDegrees.indexOf(thisDegree);                    // chekcing the index of degree in all dagreea array 
-                     if(mIndex == -1){                                              
-                        allDegrees.push(thisDegree);                // push if degree is not repeating degree
-                       }
+                if(thisDegree){                                                     
+                  thisDegree = sanitizeDegree(thisDegree);  
+                  var mIndex = mastersDegrees.indexOf(thisDegree);     
+                    if(mIndex == -1){                                              
+                      if(thisDegree[0]=='m'){
+                        mastersDegrees.push(thisDegree);
+                      } 
                     }
-                   });                
-                 })
-               for(i=0;i<allDegrees.length;i++)                    // loop for master degree
-               {            
-                  if(allDegrees[i][k]=='m')                        // cheking master degree
-                   mastersDegrees.push(allDegrees[i]);             //  push only master degree in mastersDegrees array
-               }          
-               finalPrincipalList=[];                                        // array of principle with master degree
-               dataPriciplesandDegree.forEach( (Element, eIndex)=>{           //loop for mathching that element should have master degree
-                var thisDegree = Element.data['principals-educationalprofessional-qualifications'];
-                     thisDegree = sanitizeDegree(thisDegree);                    
-                     var pIndex = mastersDegrees.indexOf(thisDegree);       //checking the index of degree with masterdegree   
-                     if(pIndex != -1){
-                        finalPrincipalList.push(Element);              //  push if the degree  matches with master degree 
-                      }
-                 })
+                  }
+              });                
+            });      
+            console.log(mastersDegrees) ;              
+            var finalPrincipalList=[]; // array of principle with master degree
+            dataPriciplesandDegree.forEach( (Element, eIndex)=>{       //loop for mathching that element should have master degree
+            var thisDegree = Element.data['principals-educationalprofessional-qualifications'];
+                thisDegree = sanitizeDegree(thisDegree);                    
+                var pIndex = mastersDegrees.indexOf(thisDegree);    //checking the index of degree with masterdegree   
+                if(pIndex != -1){
+                  finalPrincipalList.push(Element);                //  push if the degree  matches with master degree 
+                }
+            });
       }
-
       else 
       { 
         console.log(err) 
@@ -60,10 +59,9 @@ Mongoose.connect("mongodb://localhost:27017/mongodb-102", function(err, db) {   
       
       var timeNow = moment();
       var diff = moment(timeNow).diff(startTime);                   /// total time taken to process the data
-     console.log(finalPrincipalList);                                      // all principle with master degree   
+    // console.log(finalPrincipalList);                                      // all principle with master degree   
      console.log("% of principle who have master degree: "+finalPrincipalList.length / dataPriciplesandDegree.length * 100 + "%");      // % of principle with master degree      
-     console.log("Time Taken: " + diff);
-     console.log(dataPriciplesandDegree);
+     console.log("Time Taken: " + diff)    
   } )   
 }
 findPrincipleWithMasterDegree() ;       /// function for finding all principle  with master degree
@@ -81,8 +79,7 @@ findPrincipleWithMasterDegree() ;       /// function for finding all principle  
   schoolModel.distinct("data.principals-educationalprofessional-qualifications", function (err, distinctQualificationsList) {  
     if (!err){ 
          var k = 0;
-         var arr = [];
-         var ar1 = [];         
+         var arr = [];             
          var mastersDegrees = [];         
          distinctQualificationsList.forEach( (Element, eIndex)=>{
            var thisDegrees = Element.split(",");
